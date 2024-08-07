@@ -49,7 +49,7 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.ren.SetBackground(13/255, 27/255, 42/255)
 
         # 加载第一个模型
-        self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0.3)
+        self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0.0)
         # 加载第二个模型
         self.load_models_from_folder('model\\processed_regions',  1)
 
