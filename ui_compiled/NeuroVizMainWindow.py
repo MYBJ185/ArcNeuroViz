@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_ArcNeuroViz(object):
     def setupUi(self, ArcNeuroViz):
         ArcNeuroViz.setObjectName("ArcNeuroViz")
-        ArcNeuroViz.resize(960, 720)
+        ArcNeuroViz.resize(1080, 720)
         self.horizontalWidget = QtWidgets.QWidget(parent=ArcNeuroViz)
         self.horizontalWidget.setGeometry(QtCore.QRect(270, 180, 540, 360))
         self.horizontalWidget.setObjectName("horizontalWidget")

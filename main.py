@@ -1,3 +1,4 @@
+import os
 import sys
 import vtkmodules.vtkInteractionStyle
 import vtkmodules.vtkRenderingOpenGL2
@@ -5,7 +6,7 @@ import vtkmodules.vtkRenderingOpenGL2
 from PyQt6 import QtGui
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow
-from vtkmodules.vtkFiltersSources import vtkSphereSource
+from vtkmodules.vtkIOGeometry import vtkOBJReader
 from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkActor, vtkRenderer
 
 from ui_compiled.NeuroVizMainWindow import Ui_ArcNeuroViz
@@ -17,31 +18,52 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.setupUi(self)
         self.setWindowIcon(QIcon('icon_512.png'))
 
-        # 设置窗口样式表
+        # 设置窗口样式
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #14213d;
+                background-color: #0d1b2a;
             }
         """)
         self.setFixedSize(1080, 720)
 
-        # 创建数据源
-        source = vtkSphereSource()
-        source.SetCenter(0, 0, 0)
-        source.SetRadius(5.0)
+        # 创建渲染器
+        self.ren = vtkRenderer()
+        self.ren.SetBackground(0, 0, 0)
+        self.ren.SetBackground(13 / 255, 27 / 255, 42 / 255)
+        # 创建并设置 OBJ 读取器
+        obj_reader = vtkOBJReader()
+        obj_path = 'D:\\Dev\\LNZN\\ArcNeuroViz\\model\\MonkeyBrianShell.obj'  # 使用绝对路径
+        print(f"Loading OBJ file from: {obj_path}")
+
+        # 检查文件是否存在
+        if not os.path.exists(obj_path):
+            print(f"Error: File does not exist at {obj_path}")
+            return
+
+        obj_reader.SetFileName(obj_path)
+        obj_reader.Update()
+
+        # 检查是否成功读取文件
+        output = obj_reader.GetOutput()
+        if output.GetNumberOfPoints() == 0:
+            print(f"Error: Failed to load OBJ model from {obj_path}")
+            return
+        else:
+            print(f"Successfully loaded OBJ model from {obj_path}")
 
         # 创建映射器
         mapper = vtkPolyDataMapper()
-        mapper.SetInputConnection(source.GetOutputPort())
+        mapper.SetInputConnection(obj_reader.GetOutputPort())
 
         # 创建演员
         actor = vtkActor()
         actor.SetMapper(mapper)
 
-        # 创建渲染器
-        self.ren = vtkRenderer()
+        # 设置模型颜色
+        actor.GetProperty().SetColor(119/255, 141/255, 169/255)
+
+        # 将演员添加到渲染器
         self.ren.AddActor(actor)
-        self.ren.SetBackground(0.1, 0.2, 0.4)  # 设置背景颜色，确保背景不是黑色
 
         # 将渲染器添加到 QVTKRenderWindowInteractor
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
