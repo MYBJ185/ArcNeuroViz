@@ -9,37 +9,25 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 
-class Ui_NeuroVizMainWindow(object):
-    def setupUi(self, NeuroVizMainWindow):
-        NeuroVizMainWindow.setObjectName("NeuroVizMainWindow")
-        NeuroVizMainWindow.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
-        NeuroVizMainWindow.setEnabled(True)
-        NeuroVizMainWindow.resize(1080, 720)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(NeuroVizMainWindow.sizePolicy().hasHeightForWidth())
-        NeuroVizMainWindow.setSizePolicy(sizePolicy)
-        NeuroVizMainWindow.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
-        self.centralwidget = QtWidgets.QWidget(parent=NeuroVizMainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.vtkWidget = QVTKRenderWindowInteractor(parent=self.centralwidget)
-        self.vtkWidget.setGeometry(QtCore.QRect(270, 120, 540, 480))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vtkWidget.sizePolicy().hasHeightForWidth())
-        self.vtkWidget.setSizePolicy(sizePolicy)
+class Ui_ArcNeuroViz(object):
+    def setupUi(self, ArcNeuroViz):
+        ArcNeuroViz.setObjectName("ArcNeuroViz")
+        ArcNeuroViz.resize(960, 720)
+        self.horizontalWidget = QtWidgets.QWidget(parent=ArcNeuroViz)
+        self.horizontalWidget.setGeometry(QtCore.QRect(270, 180, 540, 360))
+        self.horizontalWidget.setObjectName("horizontalWidget")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalWidget)
+        self.horizontalLayout.setContentsMargins(1, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.vtkWidget = QVTKRenderWindowInteractor(parent=self.horizontalWidget)
+        self.vtkWidget.setEnabled(True)
         self.vtkWidget.setObjectName("vtkWidget")
-        NeuroVizMainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(parent=NeuroVizMainWindow)
-        self.statusbar.setObjectName("statusbar")
-        NeuroVizMainWindow.setStatusBar(self.statusbar)
+        self.horizontalLayout.addWidget(self.vtkWidget)
 
-        self.retranslateUi(NeuroVizMainWindow)
-        QtCore.QMetaObject.connectSlotsByName(NeuroVizMainWindow)
+        self.retranslateUi(ArcNeuroViz)
+        QtCore.QMetaObject.connectSlotsByName(ArcNeuroViz)
 
-    def retranslateUi(self, NeuroVizMainWindow):
+    def retranslateUi(self, ArcNeuroViz):
         _translate = QtCore.QCoreApplication.translate
-        NeuroVizMainWindow.setWindowTitle(_translate("NeuroVizMainWindow", "ArcNeuroViz"))
+        ArcNeuroViz.setWindowTitle(_translate("ArcNeuroViz", "Form"))
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
