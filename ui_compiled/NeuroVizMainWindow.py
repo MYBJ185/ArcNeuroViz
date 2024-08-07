@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_ArcNeuroViz(object):
     def setupUi(self, ArcNeuroViz):
         ArcNeuroViz.setObjectName("ArcNeuroViz")
-        ArcNeuroViz.resize(1080, 720)
+        ArcNeuroViz.resize(960, 720)
         self.horizontalWidget = QtWidgets.QWidget(parent=ArcNeuroViz)
         self.horizontalWidget.setGeometry(QtCore.QRect(270, 180, 540, 360))
         self.horizontalWidget.setObjectName("horizontalWidget")
@@ -23,6 +23,14 @@ class Ui_ArcNeuroViz(object):
         self.vtkWidget.setEnabled(True)
         self.vtkWidget.setObjectName("vtkWidget")
         self.horizontalLayout.addWidget(self.vtkWidget)
+        self.label = QtWidgets.QLabel(parent=ArcNeuroViz)
+        self.label.setGeometry(QtCore.QRect(390, 80, 300, 60))
+        font = QtGui.QFont()
+        font.setFamily("新宋体")
+        font.setPointSize(24)
+        self.label.setFont(font)
+        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.label.setObjectName("label")
 
         self.retranslateUi(ArcNeuroViz)
         QtCore.QMetaObject.connectSlotsByName(ArcNeuroViz)
@@ -30,4 +38,5 @@ class Ui_ArcNeuroViz(object):
     def retranslateUi(self, ArcNeuroViz):
         _translate = QtCore.QCoreApplication.translate
         ArcNeuroViz.setWindowTitle(_translate("ArcNeuroViz", "Form"))
+        self.label.setText(_translate("ArcNeuroViz", "脑机接口可视化平台"))
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor

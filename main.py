@@ -12,6 +12,24 @@ from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkActor, vtkRenderer
 from ui_compiled.NeuroVizMainWindow import Ui_ArcNeuroViz
 
 
+def parse_color_from_filename(filename):
+    """
+    从文件名中解析出颜色信息。
+    假设文件名格式为：<name>-('<R>', '<G>', '<B>').obj
+    返回 (R, G, B) 颜色值，范围在 0 到 1 之间。
+    """
+    try:
+        name_parts = filename.split('-')
+        color_part = name_parts[-1].strip(".obj")
+        color_str = color_part.strip("()").replace("'", "")
+        color_values = color_str.split(", ")
+        color = tuple(float(c) for c in color_values)
+        return color
+    except Exception as e:
+        print(f"Error parsing color from filename {filename}: {e}")
+        return 1.0, 1.0, 1.0  # 默认颜色为白色
+
+
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -33,7 +51,7 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # 加载第一个模型
         self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0.3)
         # 加载第二个模型
-        self.load_model('model\\monkeyPolyModel.obj', (119/255, 141/255, 169/255), 1)  # 绿色
+        self.load_models_from_folder('model\\processed_regions',  1)
 
         # 将渲染器添加到 QVTKRenderWindowInteractor
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
@@ -79,10 +97,23 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         actor.SetMapper(mapper)
 
         # 设置模型颜色
-        actor.GetProperty().SetColor(color)  # RGB 值，范围 0 到 1
-        actor.GetProperty().SetOpacity(opacity)  # 透明度，范围 0.0 到 1.0
+        actor.GetProperty().SetColor(color)
+        actor.GetProperty().SetOpacity(opacity)
         # 将演员添加到渲染器
         self.ren.AddActor(actor)
+
+    def load_models_from_folder(self, folder_path, opacity):
+        # 检查文件夹是否存在
+        if not os.path.isdir(folder_path):
+            print(f"Error: Folder does not exist at {folder_path}")
+            return
+
+        # 获取文件夹中的所有obj文件
+        files = [f for f in os.listdir(folder_path) if f.endswith('.obj')]
+        for filename in files:
+            file_path = os.path.join(folder_path, filename)
+            color = parse_color_from_filename(filename)
+            self.load_model(file_path, color, opacity)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         self.vtkWidget.Finalize()
