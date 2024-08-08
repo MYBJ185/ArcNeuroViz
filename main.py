@@ -1,5 +1,7 @@
 import os
 import sys
+import vtkmodules.vtkInteractionStyle
+import vtkmodules.vtkRenderingOpenGL2
 
 from PyQt6 import QtGui
 from PyQt6.QtGui import QIcon
@@ -9,11 +11,10 @@ from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkActor, vtkRenderer
 
 from ui_compiled.NeuroVizMainWindow import Ui_ArcNeuroViz
 
-
 def parse_color_from_filename(filename):
     """
     从文件名中解析出颜色信息。
-    文件名格式为：<name>-('<R>', '<G>', '<B>').obj
+    假设文件名格式为：<name>-('<R>', '<G>', '<B>').obj
     返回 (R, G, B) 颜色值，范围在 0 到 1 之间。
     """
     try:
@@ -25,7 +26,7 @@ def parse_color_from_filename(filename):
         return color
     except Exception as e:
         print(f"Error parsing color from filename {filename}: {e}")
-        return 1.0, 1.0, 1.0
+        return (1.0, 1.0, 1.0)  # 默认颜色为白色
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
@@ -46,10 +47,10 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.ren = vtkRenderer()
         self.ren.SetBackground(13/255, 27/255, 42/255)
 
-        # 加载脑外壳模型
-        self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0.0)
-        # 加载脑区模型组
-        self.load_models_from_folder('model\\processed_regions',  1)
+        # 加载脑壳模型文件
+        self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0)
+        # 加载猴脑脑区模型文件夹中的所有obj文件
+        self.load_models_from_folder('model\\processed_regions', 1)
 
         # 将渲染器添加到 QVTKRenderWindowInteractor
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
@@ -70,7 +71,6 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         obj_reader = vtkOBJReader()
         print(f"Loading OBJ file from: {file_path}")
 
-        # 检查文件是否存在
         if not os.path.exists(file_path):
             print(f"Error: File does not exist at {file_path}")
             return
@@ -78,26 +78,25 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         obj_reader.SetFileName(file_path)
         obj_reader.Update()
 
-        # 检查是否成功读取文件
         output = obj_reader.GetOutput()
         if output.GetNumberOfPoints() == 0:
             print(f"Error: Failed to load OBJ model from {file_path}")
             return
         else:
-            # print(f"Successfully loaded OBJ model from {file_path}")
-            pass
+            print(f"Successfully loaded OBJ model from {file_path}")
+
         # 创建映射器
         mapper = vtkPolyDataMapper()
         mapper.SetInputConnection(obj_reader.GetOutputPort())
 
-        # 创建演员
+        # 创建Actor
         actor = vtkActor()
         actor.SetMapper(mapper)
 
-        # 设置模型颜色
+        # 设置模型颜色和透明度
         actor.GetProperty().SetColor(color)
         actor.GetProperty().SetOpacity(opacity)
-        # 将演员添加到渲染器
+        # 将Actor添加到渲染器
         self.ren.AddActor(actor)
 
     def load_models_from_folder(self, folder_path, opacity):
