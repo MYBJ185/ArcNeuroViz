@@ -1,5 +1,8 @@
 import os
 import sys
+
+import vtk
+# 以下两个import语句是必须的，否则会出现错误
 import vtkmodules.vtkInteractionStyle
 import vtkmodules.vtkRenderingOpenGL2
 
@@ -7,14 +10,15 @@ from PyQt6 import QtGui
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from vtkmodules.vtkIOGeometry import vtkOBJReader
-from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkActor, vtkRenderer
+from vtkmodules.vtkRenderingCore import vtkPolyDataMapper, vtkActor, vtkRenderer, vtkRenderWindowInteractor
 
 from ui_compiled.NeuroVizMainWindow import Ui_ArcNeuroViz
+
 
 def parse_color_from_filename(filename):
     """
     从文件名中解析出颜色信息。
-    假设文件名格式为：<name>-('<R>', '<G>', '<B>').obj
+    文件名格式为：<name>-('<R>', '<G>', '<B>').obj
     返回 (R, G, B) 颜色值，范围在 0 到 1 之间。
     """
     try:
@@ -26,7 +30,7 @@ def parse_color_from_filename(filename):
         return color
     except Exception as e:
         print(f"Error parsing color from filename {filename}: {e}")
-        return (1.0, 1.0, 1.0)  # 默认颜色为白色
+        return 1.0, 1.0, 1.0
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
@@ -53,8 +57,12 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.load_models_from_folder('model\\processed_regions', 1)
 
         # 将渲染器添加到 QVTKRenderWindowInteractor
-        self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
-        self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
+        self.BrainWidget.GetRenderWindow().AddRenderer(self.ren)
+        self.iren = self.BrainWidget.GetRenderWindow().GetInteractor()
+
+        # 清除交互器的所有观察者
+        self.iren.RemoveAllObservers()
+        # render_window_interactor.SetRenderWindow(self.BrainWidget.GetRenderWindow())
 
         # 设置摄像机
         self.ren.ResetCamera()
@@ -64,12 +72,12 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.iren.Start()
 
         # 强制刷新渲染窗口
-        self.vtkWidget.GetRenderWindow().Render()
+        self.BrainWidget.GetRenderWindow().Render()
 
     def load_model(self, file_path, color, opacity):
         # 创建并设置 OBJ 读取器
         obj_reader = vtkOBJReader()
-        print(f"Loading OBJ file from: {file_path}")
+        # print(f"Loading OBJ file from: {file_path}")
 
         if not os.path.exists(file_path):
             print(f"Error: File does not exist at {file_path}")
@@ -83,7 +91,8 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
             print(f"Error: Failed to load OBJ model from {file_path}")
             return
         else:
-            print(f"Successfully loaded OBJ model from {file_path}")
+            pass
+            # print(f"Successfully loaded OBJ model from {file_path}")
 
         # 创建映射器
         mapper = vtkPolyDataMapper()
