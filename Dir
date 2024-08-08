@@ -1,13 +1,18 @@
 D:\Dev\LNZN\ArcNeuroViz\
 ├── main.py
 ├── icon.png
+├── models\
+│   └── processed_regions
+│   └── regions
+│   └── MonkeyBrainShell.obj
 ├── pages\
 │   └── __init__.py
-│   └── page1.py
+│   └── main_window.py
+├── widgets\
+│   └── __init__.py
 │   └── vtk_widget.py
 ├── ui\
 │   └── NeuroVizMainWindow.ui
 ├── ui_compiled\
 │   └── NeuroVizMainWindow.py
-├── vtk_widget.py
-└── vtk_widget_plugin.py
+└── requirements.txt

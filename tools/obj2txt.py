@@ -36,7 +36,7 @@ def rename_files_to_obj(folder_path):
             print(f"Renamed: {filename} -> {base_name}.obj")
 
 if __name__ == "__main__":
-    folder_path = "..\\model\\regions"
+    folder_path = "../models\\regions"
     # rename_files_to_txt(folder_path)
     # print("All files have been renamed to .txt")
     rename_files_to_obj(folder_path)

@@ -32,7 +32,7 @@ def process_folder(input_folder_path, output_folder_path):
         print(f"Processed file saved as {output_file}")
 
 if __name__ == "__main__":
-    input_folder_path = "..\\model\\regions"
-    output_folder_path = "..\\model\\processed_regions"
+    input_folder_path = "../models\\regions"
+    output_folder_path = "../models\\processed_regions"
     process_folder(input_folder_path, output_folder_path)
     print("All files have been processed.")
