@@ -1,7 +1,5 @@
 import os
 import sys
-import vtkmodules.vtkInteractionStyle
-import vtkmodules.vtkRenderingOpenGL2
 
 from PyQt6 import QtGui
 from PyQt6.QtGui import QIcon
@@ -15,7 +13,7 @@ from ui_compiled.NeuroVizMainWindow import Ui_ArcNeuroViz
 def parse_color_from_filename(filename):
     """
     从文件名中解析出颜色信息。
-    假设文件名格式为：<name>-('<R>', '<G>', '<B>').obj
+    文件名格式为：<name>-('<R>', '<G>', '<B>').obj
     返回 (R, G, B) 颜色值，范围在 0 到 1 之间。
     """
     try:
@@ -27,7 +25,7 @@ def parse_color_from_filename(filename):
         return color
     except Exception as e:
         print(f"Error parsing color from filename {filename}: {e}")
-        return 1.0, 1.0, 1.0  # 默认颜色为白色
+        return 1.0, 1.0, 1.0
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
@@ -48,9 +46,9 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.ren = vtkRenderer()
         self.ren.SetBackground(13/255, 27/255, 42/255)
 
-        # 加载第一个模型
+        # 加载脑外壳模型
         self.load_model('model\\MonkeyBrainShell.obj', (224/255, 225/255, 221/255), 0.0)
-        # 加载第二个模型
+        # 加载脑区模型组
         self.load_models_from_folder('model\\processed_regions',  1)
 
         # 将渲染器添加到 QVTKRenderWindowInteractor
@@ -86,8 +84,8 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
             print(f"Error: Failed to load OBJ model from {file_path}")
             return
         else:
-            print(f"Successfully loaded OBJ model from {file_path}")
-
+            # print(f"Successfully loaded OBJ model from {file_path}")
+            pass
         # 创建映射器
         mapper = vtkPolyDataMapper()
         mapper.SetInputConnection(obj_reader.GetOutputPort())
