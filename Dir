@@ -4,15 +4,15 @@ D:\Dev\LNZN\ArcNeuroViz\
 ├── models\
 │   └── processed_regions
 │   └── regions
-│   └── MonkeyBrainShell.obj
+│   └── monkeyBrainShell.obj
 ├── pages\
 │   └── __init__.py
 │   └── main_window.py
 ├── widgets\
 │   └── __init__.py
-│   └── vtk_widget.py
+│   └── brain_region_visualizer.py
 ├── ui\
-│   └── NeuroVizMainWindow.ui
+│   └── main_window.ui
 ├── ui_compiled\
-│   └── NeuroVizMainWindow.py
+│   └── main_window.py
 └── requirements.txt

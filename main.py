@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from pages.mainPage import MainWindow
+from pages.main_page import MainWindow
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

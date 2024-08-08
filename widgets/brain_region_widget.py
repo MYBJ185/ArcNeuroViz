@@ -23,62 +23,97 @@ def parse_color_from_filename(filename):
         return 1.0, 1.0, 1.0
 
 
-class CustomInteractorStyle(vtk.vtkInteractorStyle):
-    def __init__(self):
+class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
+    def __init__(self, start_rotation_callback=None, stop_rotation_callback=None):
+        super(CustomInteractorStyle, self).__init__()
         self.AddObserver(vtk.vtkCommand.LeftButtonPressEvent, self.left_button_press_event)
+        self.AddObserver(vtk.vtkCommand.RightButtonPressEvent, self.right_button_press_event)
+        self.AddObserver(vtk.vtkCommand.RightButtonReleaseEvent, self.right_button_release_event)
+        self.AddObserver(vtk.vtkCommand.MouseWheelForwardEvent, self.mouse_wheel_forward_event)
+        self.AddObserver(vtk.vtkCommand.MouseWheelBackwardEvent, self.mouse_wheel_backward_event)
+        self.AddObserver(vtk.vtkCommand.MouseMoveEvent, self.mouse_move_event)
         self.selected_actor = None
+        self.is_right_button_pressed = False
+        self.start_rotation_callback = start_rotation_callback
+        self.stop_rotation_callback = stop_rotation_callback
 
-    def left_button_press_event(self, obj, event):
+    def left_button_press_event(self, _, __):
         click_pos = self.GetInteractor().GetEventPosition()
-
         picker = vtk.vtkPropPicker()
         picker.Pick(click_pos[0], click_pos[1], 0, self.GetDefaultRenderer())
 
         new_actor = picker.GetActor()
 
         if new_actor:
-            # if self.selected_actor:
-            #     self.selected_actor.GetProperty().SetOpacity(1.0)  # Reset previous selected actor
             self.selected_actor = new_actor
             self.selected_actor.GetProperty().SetOpacity(0.0)  # Set new selected actor to be transparent
 
         self.OnLeftButtonDown()
         return
 
-    def OnMouseMove(self) -> None:
+    def right_button_press_event(self, _, __):
+        self.is_right_button_pressed = True
+        if self.stop_rotation_callback:
+            self.stop_rotation_callback()
+        self.OnRightButtonDown()
+        return
+
+    def right_button_release_event(self, _, __):
+        self.is_right_button_pressed = False
+        if self.start_rotation_callback:
+            self.start_rotation_callback()
+        self.OnRightButtonUp()
+        return
+
+    def mouse_wheel_forward_event(self, _, __):
+        self.GetDefaultRenderer().GetActiveCamera().Dolly(1.1)
+        self.GetDefaultRenderer().ResetCameraClippingRange()
+        self.OnMouseWheelForward()
+        return
+
+    def mouse_wheel_backward_event(self, _, __):
+        self.GetDefaultRenderer().GetActiveCamera().Dolly(0.9)
+        self.GetDefaultRenderer().ResetCameraClippingRange()
+        self.OnMouseWheelBackward()
+        return
+
+    def mouse_move_event(self, _, __):
+        if self.is_right_button_pressed:
+            self.OnMouseMove()
+        else:
+            super(CustomInteractorStyle, self).OnMouseMove()
+
+    def OnLeftButtonDown(self, obj=None, event=None):
         pass
 
-    def OnLeftButtonDown(self) -> None:
+    def OnLeftButtonUp(self, obj=None, event=None):
         pass
 
-    def OnLeftButtonUp(self) -> None:
+    def OnMiddleButtonDown(self, obj=None, event=None):
         pass
 
-    def OnMiddleButtonDown(self) -> None:
+    def OnMiddleButtonUp(self, obj=None, event=None):
         pass
 
-    def OnMiddleButtonUp(self) -> None:
+    def OnRightButtonDown(self, obj=None, event=None):
+        super().OnLeftButtonDown()
+
+    def OnRightButtonUp(self, obj=None, event=None):
+        super().OnLeftButtonUp()
+
+    def OnMouseWheelForward(self, obj=None, event=None):
         pass
 
-    def OnRightButtonDown(self) -> None:
+    def OnMouseWheelBackward(self, obj=None, event=None):
         pass
 
-    def OnRightButtonUp(self) -> None:
+    def OnChar(self, obj=None, event=None):
         pass
 
-    def OnMouseWheelForward(self) -> None:
+    def OnKeyPress(self, obj=None, event=None):
         pass
 
-    def OnMouseWheelBackward(self) -> None:
-        pass
-
-    def OnChar(self) -> None:
-        pass
-
-    def OnKeyPress(self) -> None:
-        pass
-
-    def OnKeyRelease(self) -> None:
+    def OnKeyRelease(self, obj=None, event=None):
         pass
 
 
