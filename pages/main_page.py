@@ -10,16 +10,20 @@ from widgets.brain_region_rotator import BrainRegionRotator
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
+        self.actionAbout = None
+        self.actionExit = None
+        self.actionSave = None
+        self.actionOpen = None
         self.rotator = None
         self.iren = None
         self.ren = None
         self.setupUi(self)
         self.setWindowIcon(QIcon('icon_512.png'))
-
+        self.init_actions()
         # 设置窗口样式表
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #0d1b2a;
+                background-color: #2b2b2b;
             }
         """)
         self.setFixedSize(1080, 720)
@@ -28,11 +32,28 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.init_vtk_widget()
         self.init_rotator()
 
+    def init_actions(self):
+        """初始化菜单栏动作"""
+        self.actionOpen = QtGui.QAction("Open", self)
+        self.actionSave = QtGui.QAction("Save", self)
+        self.actionExit = QtGui.QAction("Exit", self)
+        self.actionAbout = QtGui.QAction("About", self)
+
+        # 绑定动作到菜单栏
+        self.menuFile.addAction(self.actionOpen)
+        self.menuFile.addAction(self.actionSave)
+        self.menuFile.addAction(self.actionExit)
+        self.menuHelp.addAction(self.actionAbout)
+
+        # 绑定动作到槽函数
+        self.actionExit.triggered.connect(self.close)  # 点击Exit退出应用
+        # 其他动作可以绑定到相应的处理函数
+
     def init_renderer(self):
         """初始化渲染器"""
         self.ren = vtkRenderer()
-        self.ren.SetBackground(13 / 255, 27 / 255, 42 / 255)
-
+        # self.ren.SetBackground(13 / 255, 27 / 255, 42 / 255)
+        self.ren.SetBackground(27/255, 27/255, 27/255)
         # 加载脑壳模型文件
         load_model(self.ren, 'models\\monkeyBrainShell.obj', (224 / 255, 225 / 255, 221 / 255), 0)
         # 加载猴脑脑区模型文件夹中的所有obj文件
@@ -58,13 +79,6 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # 强制刷新渲染窗口
         self.BrainWidget.GetRenderWindow().Render()
 
-    # def init_timer(self):
-    #     """初始化定时器"""
-    #     self.angle = 0
-    #     self.timer = QtCore.QTimer(self)
-    #     self.timer.timeout.connect(self.rotate_model)
-    #     self.rotation_enabled = False  # 旋转功能默认关闭
-
     def init_rotator(self):
         """初始化旋转控制"""
         self.rotator = BrainRegionRotator(self.ren)
@@ -80,4 +94,15 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """窗口关闭事件"""
-        self.BrainWidget.Finalize()
+        # 停止模型旋转
+        self.stop_rotation()
+
+        # 停止VTK窗口的渲染
+        self.BrainWidget.GetRenderWindow().Finalize()
+
+        # 关闭交互器
+        if self.iren is not None:
+            self.iren.TerminateApp()
+
+        # 确保窗口正常关闭
+        event.accept()

@@ -11,29 +11,29 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Arc NeuroWave Visualizer</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>80</y>
-     <width>300</width>
-     <height>60</height>
+     <x>0</x>
+     <y>0</y>
+     <width>960</width>
+     <height>30</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>新宋体</family>
-     <pointsize>24</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>脑机接口可视化平台</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QVTKRenderWindowInteractor" name="BrainWidget" native="true">
    <property name="enabled">
@@ -41,10 +41,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>180</y>
-     <width>540</width>
-     <height>360</height>
+     <x>0</x>
+     <y>30</y>
+     <width>460</width>
+     <height>300</height>
     </rect>
    </property>
   </widget>

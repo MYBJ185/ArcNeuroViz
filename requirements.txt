@@ -1,3 +1,5 @@
 PyQt6~=6.7.1
 VTK~=9.3.1
-qt6-tools~=6.4.3
+numpy~=2.0.1
+matplotlib~=3.9.1.post1
+cupy-cuda12x

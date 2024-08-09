@@ -13,24 +13,26 @@ class Ui_ArcNeuroViz(object):
     def setupUi(self, ArcNeuroViz):
         ArcNeuroViz.setObjectName("ArcNeuroViz")
         ArcNeuroViz.resize(960, 720)
-        self.label = QtWidgets.QLabel(parent=ArcNeuroViz)
-        self.label.setGeometry(QtCore.QRect(390, 80, 300, 60))
-        font = QtGui.QFont()
-        font.setFamily("新宋体")
-        font.setPointSize(24)
-        self.label.setFont(font)
-        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.label.setObjectName("label")
+        self.menubar = QtWidgets.QMenuBar(parent=ArcNeuroViz)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 960, 30))
+        self.menubar.setObjectName("menubar")
+        self.menuFile = QtWidgets.QMenu(parent=self.menubar)
+        self.menuFile.setObjectName("menuFile")
+        self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
+        self.menuHelp.setObjectName("menuHelp")
         self.BrainWidget = QVTKRenderWindowInteractor(parent=ArcNeuroViz)
         self.BrainWidget.setEnabled(True)
-        self.BrainWidget.setGeometry(QtCore.QRect(270, 180, 540, 360))
+        self.BrainWidget.setGeometry(QtCore.QRect(0, 30, 460, 300))
         self.BrainWidget.setObjectName("BrainWidget")
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(ArcNeuroViz)
         QtCore.QMetaObject.connectSlotsByName(ArcNeuroViz)
 
     def retranslateUi(self, ArcNeuroViz):
         _translate = QtCore.QCoreApplication.translate
-        ArcNeuroViz.setWindowTitle(_translate("ArcNeuroViz", "Form"))
-        self.label.setText(_translate("ArcNeuroViz", "脑机接口可视化平台"))
+        ArcNeuroViz.setWindowTitle(_translate("ArcNeuroViz", "Arc NeuroWave Visualizer"))
+        self.menuFile.setTitle(_translate("ArcNeuroViz", "File"))
+        self.menuHelp.setTitle(_translate("ArcNeuroViz", "Help"))
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
