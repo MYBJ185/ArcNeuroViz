@@ -16,12 +16,17 @@ def apply_notch_filter(header, data):
     # applying notch filter. Similarly, if data was recorded from Intan RHX
     # software version 3.0 or later, any active notch filter was already
     # applied to the saved data, so it should not be re-applied.
+    # print("notch_filter_frequency: ", header['notch_filter_frequency'])
+    # print("version: ", header['version']['major'])
+    #  print(header["version"]['major'] >= 3)
     if (header['notch_filter_frequency'] == 0
             or header['version']['major'] >= 3):
         return
-
+    # print("notch_filter_frequency: ", header['notch_filter_frequency'])
+    # print("version: ", header['version']['major'])
+    # print(header["version"]['major'] >= 3)
     # Apply notch filter individually to each channel in order
-    print('Applying notch filter...')
+    # print('Applying notch filter...')
     print_step = 10
     percent_done = print_step
     for i in range(header['num_amplifier_channels']):

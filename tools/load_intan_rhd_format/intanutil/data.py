@@ -7,9 +7,13 @@ blocks and at the Python level with dictionaries of NumPy arrays.
 
 import os
 import struct
+import sys
+
 import cupy as cp
 
 import numpy as np
+# from header import get_timestamp_signed
+# from report import print_record_time_summary, print_progress
 from intanutil.header import get_timestamp_signed
 from intanutil.report import print_record_time_summary, print_progress
 
@@ -80,8 +84,8 @@ def parse_data(header, data):
     print('Parsing data...')
     print("Extracting digital data...")
     extract_digital_data(header, data)
-    print("Scaling data...")
-    scale_analog_data(header, data)
+    # print("Scaling data...")
+    # scale_analog_data(header, data)
     print("Scaling timestamps...")
     scale_timestamps(header, data)
 
@@ -452,7 +456,7 @@ def scale_analog_data(header, data):
     units (microVolts, Volts, deg C).
     """
     # Scale amplifier data (units = microVolts).
-    chunk_size = 10000  # 每个块的大小，根据你的内存情况调整
+    chunk_size = 30000  # 每个块的大小，根据你的内存情况调整
 
     # 获取数据的维度
     num_channels, total_samples = data['amplifier_data'].shape

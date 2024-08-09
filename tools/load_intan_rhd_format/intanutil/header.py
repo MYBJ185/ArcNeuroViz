@@ -36,7 +36,7 @@ def read_header(fid):
     initialize_channels(header)
 
     read_signal_summary(header, fid)
-
+    print("Done reading header.")
     return header
 
 

@@ -6,41 +6,55 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>460</width>
-    <height>128</height>
+    <width>372</width>
+    <height>272</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string notr="true">Arc NeuroWave Visualizer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QLabel" name="label_path">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>71</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Data Path</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_path">
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>80</y>
+      <y>10</y>
       <width>191</width>
       <height>26</height>
      </rect>
     </property>
-    <property name="editable">
-     <bool>true</bool>
+   </widget>
+   <widget class="QPushButton" name="pushButton_browse">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>10</y>
+      <width>75</width>
+      <height>26</height>
+     </rect>
     </property>
-    <property name="currentText">
-     <string notr="true">Select a sample rate...</string>
-    </property>
-    <property name="maxVisibleItems">
-     <number>9</number>
-    </property>
-    <property name="placeholderText">
-     <string>12321</string>
+    <property name="text">
+     <string>Browse</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_2">
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>30</y>
+      <y>50</y>
       <width>191</width>
       <height>26</height>
      </rect>
@@ -56,7 +70,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>50</y>
       <width>71</width>
       <height>26</height>
      </rect>
@@ -72,7 +86,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>80</y>
+      <y>90</y>
       <width>71</width>
       <height>26</height>
      </rect>
@@ -81,11 +95,30 @@
      <string>Sample rate</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>90</y>
+      <width>191</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>true</bool>
+    </property>
+    <property name="currentText">
+     <string notr="true">Select a sample rate...</string>
+    </property>
+    <property name="maxVisibleItems">
+     <number>9</number>
+    </property>
+   </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>80</y>
+      <y>90</y>
       <width>75</width>
       <height>26</height>
      </rect>
@@ -98,13 +131,29 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>30</y>
+      <y>50</y>
       <width>75</width>
       <height>26</height>
      </rect>
     </property>
     <property name="text">
      <string>Cancel</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit_log">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>130</y>
+      <width>351</width>
+      <height>140</height>
+     </rect>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

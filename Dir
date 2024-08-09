@@ -8,11 +8,18 @@ D:\Dev\LNZN\ArcNeuroViz\
 ├── pages\
 │   └── __init__.py
 │   └── main_window.py
+│   └── import_settings_page.py
 ├── widgets\
 │   └── __init__.py
-│   └── brain_region_visualizer.py
+│   └── brain_region_rotator.py
+│   └── brain_region_widget.py
 ├── ui\
+│   └── import_settings.ui
 │   └── main_window.ui
 ├── ui_compiled\
 │   └── main_window.py
+│   └── import_settings.py
+├── data_processing\
+│   └── __init__.py
+│   └── data_loader.py
 └── requirements.txt

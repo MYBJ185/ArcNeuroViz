@@ -1,15 +1,18 @@
-from PyQt6 import QtGui
+from PyQt6 import QtGui, QtCore
 from PyQt6.QtGui import QIcon
+
 from PyQt6.QtWidgets import QMainWindow
 from vtkmodules.vtkRenderingCore import vtkRenderer
 from ui_compiled.main_window import Ui_ArcNeuroViz
 from widgets.brain_region_widget import CustomInteractorStyle, load_model, load_models_from_folder
 from widgets.brain_region_rotator import BrainRegionRotator
+from pages.import_settings_page import ImportSettingsWindow
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
+        self.settings_window = None  # 添加一个属性来存储设置窗口的实例
         self.actionAbout = None
         self.actionExit = None
         self.actionSave = None
@@ -34,20 +37,27 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
 
     def init_actions(self):
         """初始化菜单栏动作"""
-        self.actionOpen = QtGui.QAction("Open", self)
-        self.actionSave = QtGui.QAction("Save", self)
+        self.actionOpen = QtGui.QAction("Import data from...", self)
         self.actionExit = QtGui.QAction("Exit", self)
         self.actionAbout = QtGui.QAction("About", self)
 
         # 绑定动作到菜单栏
         self.menuFile.addAction(self.actionOpen)
-        self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionExit)
         self.menuHelp.addAction(self.actionAbout)
 
         # 绑定动作到槽函数
+        self.actionOpen.triggered.connect(self.open_settings_window)  # 打开导入窗口
         self.actionExit.triggered.connect(self.close)  # 点击Exit退出应用
-        # 其他动作可以绑定到相应的处理函数
+
+    def open_settings_window(self):
+        """打开设置窗口"""
+        if not self.settings_window:
+            print("Opening settings window...")
+            self.settings_window = ImportSettingsWindow()
+            self.settings_window.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)  # 设置模态窗口
+        self.settings_window.show()
+        self.settings_window.set_output_log()
 
     def init_renderer(self):
         """初始化渲染器"""
