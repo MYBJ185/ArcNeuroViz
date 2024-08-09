@@ -18,7 +18,8 @@ class QTextEditLogger:
 
     def flush(self):
         # 清空文本区域
-        self.text_edit.clear()
+        # self.text_edit.clear()
+        pass
 
 
 class ImportSettingsWindow(QMainWindow, Ui_import_settings):
@@ -45,7 +46,7 @@ class ImportSettingsWindow(QMainWindow, Ui_import_settings):
         # 连接按钮点击事件
         self.pushButton_browse.clicked.connect(self.open_file_dialog)
         self.pushButton.clicked.connect(self.start_data_loading)
-        self.pushButton_2.clicked.connect(self.close)
+        self.pushButton_2.clicked.connect(self.data_loader.save_to_npy)
 
         self.set_output_log()
 

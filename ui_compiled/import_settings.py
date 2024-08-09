@@ -66,4 +66,4 @@ class Ui_import_settings(object):
         self.label.setText(_translate("import_settings", "Data Type"))
         self.label_2.setText(_translate("import_settings", "Sample rate"))
         self.pushButton.setText(_translate("import_settings", "OK"))
-        self.pushButton_2.setText(_translate("import_settings", "Cancel"))
+        self.pushButton_2.setText(_translate("import_settings", "Save"))
