@@ -36,7 +36,7 @@ def read_header(fid):
     initialize_channels(header)
 
     read_signal_summary(header, fid)
-    print("Done reading header.")
+
     return header
 
 
@@ -57,8 +57,8 @@ def read_version_number(header, fid):
     (version['major'], version['minor']) = struct.unpack('<hh', fid.read(4))
     header['version'] = version
 
-    print('\nReading Intan Technologies RHD Data File, Version {}.{}\n'
-          .format(version['major'], version['minor']))
+    # print('\nReading Intan Technologies RHD Data File, Version {}.{}\n'
+    #       .format(version['major'], version['minor']))
 
 
 def set_num_samples_per_data_block(header):

@@ -4,16 +4,11 @@
 blocks and at the Python level with dictionaries of NumPy arrays.
 """
 
-
 import os
 import struct
-import sys
-
-import cupy as cp
 
 import numpy as np
-# from header import get_timestamp_signed
-# from report import print_record_time_summary, print_progress
+
 from intanutil.header import get_timestamp_signed
 from intanutil.report import print_record_time_summary, print_progress
 
@@ -46,9 +41,8 @@ def calculate_data_size(header, filename, fid):
     num_samples = calculate_num_samples(header, num_blocks)
 
     record_time, sample_rate = print_record_time_summary(num_samples['amplifier'],
-                              header['sample_rate'],
-                              data_present)
-
+                                                         header['sample_rate'],
+                                                         data_present)
     return data_present, filesize, num_blocks, num_samples, record_time, sample_rate
 
 
@@ -57,7 +51,7 @@ def read_all_data_blocks(header, num_samples, num_blocks, fid):
     returning 'data' dict containing all data.
     """
     data, indices = initialize_memory(header, num_samples)
-    print("Reading data from file...")
+    # print("Reading data from file...")
     print_step = 10
     percent_done = print_step
     for i in range(num_blocks):
@@ -82,11 +76,11 @@ def parse_data(header, data):
     like microVolts, degrees Celsius, or seconds.)
     """
     print('Parsing data...')
-    print("Extracting digital data...")
+    print('Extracting digital data...')
     extract_digital_data(header, data)
-    # print("Scaling data...")
-    # scale_analog_data(header, data)
-    print("Scaling timestamps...")
+    print('Scaling data...')
+    scale_analog_data(header, data)
+    print('Scaling timestamps...')
     scale_timestamps(header, data)
 
 
@@ -314,7 +308,7 @@ def read_analog_signal_type(fid, dest, start, num_samples, num_channels):
     if num_channels < 1:
         return
     end = start + num_samples
-    tmp = np.fromfile(fid, dtype='uint16', count=num_samples*num_channels)
+    tmp = np.fromfile(fid, dtype='uint16', count=num_samples * num_channels)
     dest[range(num_channels), start:end] = (
         tmp.reshape(num_channels, num_samples))
 
@@ -431,7 +425,7 @@ def scale_timestamps(header, data):
     """
     # Check for gaps in timestamps.
     num_gaps = np.sum(np.not_equal(
-        data['t_amplifier'][1:]-data['t_amplifier'][:-1], 1))
+        data['t_amplifier'][1:] - data['t_amplifier'][:-1], 1))
     if num_gaps == 0:
         print('No missing timestamps in data.')
     else:
@@ -456,61 +450,31 @@ def scale_analog_data(header, data):
     units (microVolts, Volts, deg C).
     """
     # Scale amplifier data (units = microVolts).
-    chunk_size = 30000  # 每个块的大小，根据你的内存情况调整
-
-    # 获取数据的维度
-    num_channels, total_samples = data['amplifier_data'].shape
-
-    # 创建一个新的数组来存储处理后的结果
-    processed_data = np.empty_like(data['amplifier_data'], dtype=np.float32)
-
-    for i in range(0, total_samples, chunk_size):
-        print(f"Processing chunk {i // chunk_size + 1} of {total_samples // chunk_size}")
-        # 计算当前块的结束索引
-        end = min(i + chunk_size, total_samples)
-
-        # 将当前块的数据转移到GPU
-        data_gpu = cp.asarray(data['amplifier_data'][:, i:end], dtype=cp.int32)
-
-        # 在GPU上进行计算
-        processed_chunk = 0.195 * (data_gpu - 32768)
-
-        # 将处理后的数据从GPU移回CPU
-        processed_data[:, i:end] = cp.asnumpy(processed_chunk)
-
-        # 释放GPU内存
-        del data_gpu
-        del processed_chunk
-        cp.get_default_memory_pool().free_all_blocks()
-
-    # 将处理后的数据替换原数据
-    data['amplifier_data'] = processed_data
-    # data['amplifier_data'] = np.multiply(
-    #     0.195, (data['amplifier_data'].astype(np.int32) - 32768))
+    data['amplifier_data'] = np.multiply(
+        0.195, (data['amplifier_data'].astype(np.int32) - 32768))
 
     # Scale aux input data (units = Volts).
-    # data['aux_input_data'] = np.multiply(
-    #     37.4e-6, data['aux_input_data'])
-    data['aux_input_data'] = cp.asnumpy(37.4e-6 * cp.asarray(data['aux_input_data'], dtype=cp.int32))
+    data['aux_input_data'] = np.multiply(
+        37.4e-6, data['aux_input_data'])
 
     # Scale supply voltage data (units = Volts).
-    # data['supply_voltage_data'] = np.multiply(
-    #     74.8e-6, data['supply_voltage_data'])
-    data['supply_voltage_data'] = cp.asnumpy(74.8e-6 * cp.asarray(data['supply_voltage_data'], dtype=cp.int32))
-    #
-    # # Scale board ADC data (units = Volts).
-    # if header['eval_board_mode'] == 1:
-    #     data['board_adc_data'] = np.multiply(
-    #         152.59e-6, (data['board_adc_data'].astype(np.int32) - 32768))
-    # elif header['eval_board_mode'] == 13:
-    #     data['board_adc_data'] = np.multiply(
-    #         312.5e-6, (data['board_adc_data'].astype(np.int32) - 32768))
-    # else:
-    #     data['board_adc_data'] = np.multiply(
-    #         50.354e-6, data['board_adc_data'])
-    # # Scale temp sensor data (units = deg C).
-    # data['temp_sensor_data'] = np.multiply(
-    #     0.01, data['temp_sensor_data'])
+    data['supply_voltage_data'] = np.multiply(
+        74.8e-6, data['supply_voltage_data'])
+
+    # Scale board ADC data (units = Volts).
+    if header['eval_board_mode'] == 1:
+        data['board_adc_data'] = np.multiply(
+            152.59e-6, (data['board_adc_data'].astype(np.int32) - 32768))
+    elif header['eval_board_mode'] == 13:
+        data['board_adc_data'] = np.multiply(
+            312.5e-6, (data['board_adc_data'].astype(np.int32) - 32768))
+    else:
+        data['board_adc_data'] = np.multiply(
+            50.354e-6, data['board_adc_data'])
+
+    # Scale temp sensor data (units = deg C).
+    data['temp_sensor_data'] = np.multiply(
+        0.01, data['temp_sensor_data'])
 
 
 def extract_digital_data(header, data):
@@ -524,7 +488,7 @@ def extract_digital_data(header, data):
             np.bitwise_and(
                 data['board_dig_in_raw'],
                 (1 << header['board_dig_in_channels'][i]['native_order'])
-                ),
+            ),
             0)
 
     for i in range(header['num_board_dig_out_channels']):
@@ -532,7 +496,7 @@ def extract_digital_data(header, data):
             np.bitwise_and(
                 data['board_dig_out_raw'],
                 (1 << header['board_dig_out_channels'][i]['native_order'])
-                ),
+            ),
             0)
 
 

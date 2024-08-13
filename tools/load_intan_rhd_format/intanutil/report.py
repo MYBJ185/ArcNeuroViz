@@ -44,16 +44,14 @@ def print_record_time_summary(num_amp_samples, sample_rate, data_present):
     record_time = num_amp_samples / sample_rate
 
     if data_present:
-        pass
-        # print('File contains {:0.3f} seconds of data.  '
-        #       'Amplifiers were sampled at {:0.2f} kS/s.'
-        #       .format(record_time, sample_rate / 1000))
+        print('File contains {:0.3f} seconds of data.  '
+              'Amplifiers were sampled at {:0.2f} kS/s.'
+              .format(record_time, sample_rate / 1000))
     else:
         print('Header file contains no data.  '
               'Amplifiers were sampled at {:0.2f} kS/s.'
               .format(sample_rate / 1000))
     return record_time, sample_rate
-
 
 def print_progress(i, target, print_step, percent_done):
     """Prints progress of an arbitrary process based on position i / target,

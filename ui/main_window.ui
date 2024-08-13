@@ -41,10 +41,20 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>305</x>
      <y>30</y>
-     <width>460</width>
-     <height>300</height>
+     <width>350</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTreeView" name="treeView">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>256</width>
+     <height>681</height>
     </rect>
    </property>
   </widget>

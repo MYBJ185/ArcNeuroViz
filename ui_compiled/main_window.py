@@ -22,8 +22,11 @@ class Ui_ArcNeuroViz(object):
         self.menuHelp.setObjectName("menuHelp")
         self.BrainWidget = QVTKRenderWindowInteractor(parent=ArcNeuroViz)
         self.BrainWidget.setEnabled(True)
-        self.BrainWidget.setGeometry(QtCore.QRect(0, 30, 460, 300))
+        self.BrainWidget.setGeometry(QtCore.QRect(305, 30, 350, 200))
         self.BrainWidget.setObjectName("BrainWidget")
+        self.treeView = QtWidgets.QTreeView(parent=ArcNeuroViz)
+        self.treeView.setGeometry(QtCore.QRect(10, 30, 256, 681))
+        self.treeView.setObjectName("treeView")
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 

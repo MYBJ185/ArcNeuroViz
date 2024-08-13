@@ -1,12 +1,12 @@
 import sys
 import threading
 
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QFileDialog
-
-from ui_compiled.import_settings import Ui_import_settings
 from data_processing.data_loader import RHDDataLoader
+from ui_compiled.rhd2avz import Ui_rhd2avz
+from tools.load_intan_rhd_format.load_intan_rhd_format import read_rhd_data
 
 
 class QTextEditLogger:
@@ -24,9 +24,9 @@ class QTextEditLogger:
         pass
 
 
-class ImportSettingsWindow(QMainWindow, Ui_import_settings):
+class Rhd2AVZ(QMainWindow, Ui_rhd2avz):
     def __init__(self) -> None:
-        super(ImportSettingsWindow, self).__init__()
+        super(Rhd2AVZ, self).__init__()
         self.mainWindow = None  # 添加一个属性来存储主窗口的实例
         self.original_stdout = None
         self.log_output = None
@@ -41,15 +41,15 @@ class ImportSettingsWindow(QMainWindow, Ui_import_settings):
         """)
         self.setupUi(self)
         self.setWindowTitle("ANV - Import data file")
-        self.setFixedSize(372, 272)
+        self.setFixedSize(372, 317)
         # 设置下拉菜单选项
         self.setup_comboboxes()
 
         # 连接按钮点击事件
-        self.pushButton_browse.clicked.connect(self.open_file_dialog)
-        self.pushButton.clicked.connect(self.start_data_loading)
-        self.pushButton_2.clicked.connect(self.data_loader.save_rhd_data)
-
+        self.pushButton_browse.clicked.connect(self.open_files_dialog)
+        self.pushButton_browse_2.clicked.connect(self.open_file_dialog)
+        self.pushButton_2.clicked.connect(self.close)
+        self.pushButton.clicked.connect(self.start_data_transfer)
         self.set_output_log()
 
     def set_output_log(self):
@@ -67,27 +67,34 @@ class ImportSettingsWindow(QMainWindow, Ui_import_settings):
         # 打开文件选择对话框
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Data File", "", "RHD Files (*.rhd)")
         if file_path:
-            self.lineEdit_path.setText(file_path)
+            self.lineEdit_path_2.setText(file_path)
 
-    def start_data_loading(self):
-        # 获取文件路径和其他选项
-        file_path = self.lineEdit_path.text()
+    def open_files_dialog(self):
+        # 打开文件夹选择对话框
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Data Directory", "")
+        if folder_path:
+            self.lineEdit_path.setText(folder_path)
+
+    def start_data_transfer(self):
+
+        file_path = self.lineEdit_path_2.text()
         selected_samplerate = self.comboBox.currentText()
 
-        if file_path:
-            # 禁用控件
-            self.pushButton.setEnabled(False)
-            self.pushButton_browse.setEnabled(False)
-            self.comboBox.setEnabled(False)
-            self.comboBox_2.setEnabled(False)
+        self.mainWindow.working_dir = self.lineEdit_path.text()
+        self.data_loader.working_dir = self.mainWindow.working_dir
+        self.log_message(f"Working directory set to {self.mainWindow.working_dir}")
+        self.log_message("Starting data transfer...")
 
-            # 创建并启动数据加载线程，传递 data_loader 实例
-            self.data_loader_thread = DataLoaderThread(self.data_loader, file_path, selected_samplerate)
-            # noinspection PyUnresolvedReferences
-            self.data_loader_thread.data_loaded.connect(self.on_data_loaded)
-            self.data_loader_thread.start()
-        else:
-            self.log_message("No file selected.")
+        # 创建并启动数据加载线程，传递 data_loader 实例
+        self.data_loader_thread = DataTransformerThread(self.data_loader, file_path, selected_samplerate)
+        # self.data_loader_thread.data_loaded.connect(self.on_data_loaded)
+        self.data_loader_thread.start()
+        # self.data_loader.save_rhd_data(file_path)
+        # 禁用控件
+        self.pushButton.setEnabled(False)
+        self.pushButton_browse.setEnabled(False)
+        self.comboBox.setEnabled(False)
+        self.comboBox_2.setEnabled(False)
 
     def on_data_loaded(self, message):
         # 当数据加载完成后，重新启用控件并显示消息
@@ -106,7 +113,7 @@ class ImportSettingsWindow(QMainWindow, Ui_import_settings):
         self.textEdit_log.append(message)
 
 
-class DataLoaderThread(QThread):
+class DataTransformerThread(threading.Thread):
     # 创建信号用于在数据加载完成后通知主线程
     data_loaded = pyqtSignal(str)
 
@@ -122,11 +129,12 @@ class DataLoaderThread(QThread):
     def run(self):
         # 在后台线程中执行耗时操作
         print("Loading data from file...")
-        self.data_loader.load_rhd_data(self.file_path)
 
+        # self.data_loader.save_rhd_data(self.file_path)
+        # 等待5s
+        read_rhd_data(self.file_path)
         # 数据加载完成后发送信号
-        # noinspection PyUnresolvedReferences
-        self.data_loaded.emit(f"Data loaded from {self.file_path} with sample rate {self.samplerate}")
+        print(f"Data loaded from {self.file_path} with sample rate {self.samplerate}")
 
     def pause(self):
         """暂停线程执行"""

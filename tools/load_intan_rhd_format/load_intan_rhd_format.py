@@ -5,7 +5,11 @@
 acquisition software (IntanRHX, or legacy Recording Controller / USB
 Evaluation Board software).
 """
+
+import sys
 import time
+
+import matplotlib.pyplot as plt
 
 from intanutil.header import (read_header,
                               header_to_result)
@@ -36,8 +40,7 @@ def read_rhd_data(file_path):
         # Calculate how much data is present and summarize to console.
         data_present, filesize, num_blocks, num_samples, rc_time, sam_rate = (
             calculate_data_size(header, file_path, fid))
-        print('File contains {:0.3f} seconds of data.'.format(rc_time))
-        print('Amplifiers were sampled at {:0.2f} kS/s.'.format(sam_rate / 1000))
+
         # If .rhd file contains data, read all present data blocks into 'data'
         # dict, and verify the amount of data read.
         if data_present:
@@ -61,7 +64,7 @@ def read_rhd_data(file_path):
     # One File Per Channel data formats, in which actual data is saved in
     # separate .dat files), just return data as an empty list.
     else:
-        pass
+        data = []
 
     # Report how long read took.
     print('Done!  Elapsed time: {0:0.1f} seconds'.format(time.time() - tic))
@@ -71,5 +74,36 @@ def read_rhd_data(file_path):
 
 
 if __name__ == '__main__':
-    a, record_time, sample_rate = read_rhd_data("../../s0633_0615_0690_221219_114735.rhd")
+    a = read_rhd_data(sys.argv[1])
+    print(a)
 
+    fig, ax = plt.subplots(7, 1)
+    ax[0].set_ylabel('Amp')
+    ax[0].plot(a['t_amplifier'], a['amplifier_data'][0, :])
+    ax[0].margins(x=0, y=0)
+
+    ax[1].set_ylabel('Aux')
+    ax[1].plot(a['t_aux_input'], a['aux_input_data'][6, :])
+    ax[1].margins(x=0, y=0)
+
+    # ax[2].set_ylabel('Vdd')
+    # ax[2].plot(a['t_supply_voltage'], a['supply_voltage_data'][0, :])
+    # ax[2].margins(x=0, y=0)
+
+    ax[3].set_ylabel('ADC')
+    ax[3].plot(a['t_board_adc'], a['board_adc_data'][0, :])
+    ax[3].margins(x=0, y=0)
+
+    ax[4].set_ylabel('Digin')
+    ax[4].plot(a['t_dig'], a['board_dig_in_data'][0, :])
+    ax[4].margins(x=0, y=0)
+
+    ax[5].set_ylabel('Digout')
+    ax[5].plot(a['t_dig'], a['board_dig_out_data'][0, :])
+    ax[5].margins(x=0, y=0)
+
+    # ax[6].set_ylabel('Temp')
+    # ax[6].plot(a['t_temp_sensor'], a['temp_sensor_data'][0, :])
+    # ax[6].margins(x=0, y=0)
+
+    plt.show()
