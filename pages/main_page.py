@@ -3,15 +3,13 @@ import os
 import h5py
 from PyQt6 import QtGui, QtCore
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
-from vtkmodules.vtkRenderingCore import vtkRenderer
 from data_processing.data_loader import load_data_from_h5, sort_key
+from pages.model_page import ModelPage
 
 from ui_compiled.main_window import Ui_ArcNeuroViz
-
-from widgets.brain_region_widget import CustomInteractorStyle, load_model, load_models_from_folder
-from widgets.brain_region_rotator import BrainRegionRotator
+from widgets.OpenGLWiget import CustomOpenGLWidget
 
 from pages.import_settings_page import ImportSettingsWindow
 from pages.rhd2avzproject_page import Rhd2AVZ
@@ -23,10 +21,16 @@ from collections import defaultdict
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
+        self.model_window = None
+        self.renderer = None
+        self.vtk_widget = None
+        self.opengl_widget = None
+        self.opengl_layout = None
+        self.opengl_container = None
         self.setupUi(self)
         # 初始化模型
         self.model = QtGui.QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(["Working Directory:"])
+        self.model.setHorizontalHeaderLabels(["no working dir set:"])
         self.treeView.setModel(self.model)
 
         # 初始化时创建抽象的结构
@@ -53,12 +57,27 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
                 background-color: #2b2b2b;
             }
         """)
-        self.setFixedSize(960, 720)
+        self.setFixedSize(1015, 720)
 
-        self.init_renderer()
-        self.init_vtk_widget()
-        self.init_rotator()
-        # .populate_tree_view()
+        # 延迟初始化 OpenGL
+        self.init_custom_opengl_widget()
+        self.open_model_window()
+
+    def init_custom_opengl_widget(self):
+        self.opengl_container = QWidget(self)
+        self.opengl_container.setGeometry(305, 30, 705, 680)  # 设置位置和尺寸
+
+        self.opengl_layout = QVBoxLayout(self.opengl_container)
+        self.opengl_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.opengl_widget = CustomOpenGLWidget(self.opengl_container)
+        self.opengl_layout.addWidget(self.opengl_widget)
+
+        # 将容器添加到主窗口中
+        self.opengl_container.show()
+
+        # 在 MainWindow 中应用圆角
+        self.opengl_widget.set_rounded_corners(5)
 
     def initialize_abstract_tree_structure(self):
         """初始化空的抽象树结构"""
@@ -100,6 +119,15 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # noinspection PyUnresolvedReferences
         self.actionExit.triggered.connect(self.close)  # 点击Exit退出应用
 
+    def open_model_window(self):
+        """打开模型窗口"""
+        if not self.model_window:
+            print("Opening model window...")
+            self.model_window = ModelPage()
+            self.model_window.mainWindow = self
+            self.model_window.init()
+        self.model_window.show()
+
     def open_from_folder_window(self):
         """打开设置窗口"""
         if not self.settings_window:
@@ -129,62 +157,18 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.rhd2avz_window.show()
         self.rhd2avz_window.set_output_log()
 
-    def init_renderer(self):
-        """初始化渲染器"""
-        self.ren = vtkRenderer()
-        # self.ren.SetBackground(13 / 255, 27 / 255, 42 / 255)
-        self.ren.SetBackground(27/255, 27/255, 27/255)
-        # 加载脑壳模型文件
-        load_model(self.ren, 'models\\monkeyBrainShell.obj', (224 / 255, 225 / 255, 221 / 255), 0.3)
-        # 加载猴脑脑区模型文件夹中的所有obj文件
-        load_models_from_folder(self.ren, 'models\\processed_regions', 1)
-
-    def init_vtk_widget(self):
-        """初始化 VTK 模型部件"""
-
-        self.BrainWidget.GetRenderWindow().AddRenderer(self.ren)
-        self.iren = self.BrainWidget.GetRenderWindow().GetInteractor()
-
-        # 清除交互器的所有检测器
-        # self.iren.RemoveAllObservers()
-        style = CustomInteractorStyle(start_rotation_callback=self.start_rotation,
-                                      stop_rotation_callback=self.stop_rotation)
-        style.SetDefaultRenderer(self.ren)
-        self.iren.SetInteractorStyle(style)
-
-        # 初始化和启动交互器
-        self.iren.Initialize()
-        self.iren.Start()
-
-        # 强制刷新渲染窗口
-        self.BrainWidget.GetRenderWindow().Render()
-
-    def init_rotator(self):
-        """初始化旋转控制"""
-        self.rotator = BrainRegionRotator(self.ren)
-        self.rotator.start_rotation()
-
-    def start_rotation(self):
-        """开启模型旋转"""
-        self.rotator.start_rotation()
-
-    def stop_rotation(self):
-        """关闭模型旋转"""
-        self.rotator.stop_rotation()
-
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """窗口关闭事件"""
-        # 停止模型旋转
-        self.stop_rotation()
-
-        # 停止VTK窗口的渲染
-        self.BrainWidget.GetRenderWindow().Finalize()
-
-        # 关闭交互器
-        if self.iren is not None:
-            self.iren.TerminateApp()
-
         # 确保窗口正常关闭
+        # 如果有的话关闭其余打开的窗口
+        if self.settings_window:
+            self.settings_window.close()
+        if self.rhd2avz_window:
+            self.rhd2avz_window.close()
+        if self.import_from_folder_window:
+            self.import_from_folder_window.close()
+        if self.model_window:
+            self.model_window.close()
         event.accept()
 
     def check_working_dir(self):
@@ -214,7 +198,7 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # 遍历端口和硬件的结构来填充树视图
         for port, hardware_data in port_channel_mapping.items():
             # 创建端口项
-            port_item = QtGui.QStandardItem(port)
+            port_item = QtGui.QStandardItem(f"电极:{port}")
             self.model.appendRow(port_item)
 
             # 创建一个字典来跟踪硬件节点

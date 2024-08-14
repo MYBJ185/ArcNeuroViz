@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
+    <width>1015</width>
     <height>720</height>
    </rect>
   </property>
@@ -35,38 +35,17 @@
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QVTKRenderWindowInteractor" name="BrainWidget" native="true">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>305</x>
-     <y>30</y>
-     <width>350</width>
-     <height>200</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QTreeView" name="treeView">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>30</y>
-     <width>256</width>
+     <width>281</width>
      <height>681</height>
     </rect>
    </property>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QVTKRenderWindowInteractor</class>
-   <extends>QWidget</extends>
-   <header>vtkmodules.qt.QVTKRenderWindowInteractor</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
