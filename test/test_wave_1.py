@@ -34,7 +34,7 @@ class WaveformPlotter(QtWidgets.QMainWindow):
         self.num_waveforms = 32
         self.num_data_points = 4000
         self.downsample_rate = 1
-        self.step_size = 3  # 每次移动3个坐标点
+        self.step_size = 1  # 每次移动3个坐标点
         self.waveform_plots = []
         self.data = []
         self.buffer_size = 10000  # 缓冲区大小
@@ -46,7 +46,7 @@ class WaveformPlotter(QtWidgets.QMainWindow):
         # 设置定时器用于更新数据
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_waveforms)
-        self.timer.start(16)  # 每16ms更新一次
+        self.timer.start(10)  # 每16ms更新一次
 
     def create_waveforms(self):
         for i in range(self.num_waveforms):
@@ -59,6 +59,7 @@ class WaveformPlotter(QtWidgets.QMainWindow):
 
             # 为每个波形图创建一个PlotItem
             color = (i * 8, 255, 255 - i * 8)
+            # noinspection PyUnresolvedReferences
             plot = self.plot_widget.addPlot()
             plot_item = plot.plot(downsampled_data, pen=pg.mkPen(color=color, width=1))
             self.waveform_plots.append(plot_item)
@@ -80,9 +81,10 @@ class WaveformPlotter(QtWidgets.QMainWindow):
             # 设置波形图的基本属性
             plot.showAxis('left', False)
             plot.showAxis('bottom', False)
-            plot.setMouseEnabled(x=False, y=False)
+            plot.setMouseEnabled(x=False, y=True)
 
             # 增加一些间距以便显示多个波形图
+            # noinspection PyUnresolvedReferences
             self.plot_widget.nextRow()
 
     def update_waveforms(self):
@@ -90,12 +92,16 @@ class WaveformPlotter(QtWidgets.QMainWindow):
             # 使用缓冲区中的随机数据进行更新
             self.data[i] = np.roll(self.data[i], -self.step_size)
             if self.buffer_index + self.step_size < self.buffer_size:
-                self.data[i][-self.step_size:] = self.random_buffer[i, self.buffer_index:self.buffer_index + self.step_size]
+                self.data[i][-self.step_size:] = self.random_buffer[
+                                                 i,
+                                                 self.buffer_index:self.buffer_index + self.step_size]
             else:
                 # 如果缓冲区耗尽，重新生成缓冲区
                 self.random_buffer = np.random.normal(size=(self.num_waveforms, self.buffer_size)) * 5000
                 self.buffer_index = 0
-                self.data[i][-self.step_size:] = self.random_buffer[i, self.buffer_index:self.buffer_index + self.step_size]
+                self.data[i][-self.step_size:] = self.random_buffer[
+                                                 i,
+                                                 self.buffer_index:self.buffer_index + self.step_size]
 
         self.buffer_index += self.step_size
 
