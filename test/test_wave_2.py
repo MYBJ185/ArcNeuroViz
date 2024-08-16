@@ -98,6 +98,7 @@ class WaveformPlotter(QtWidgets.QMainWindow):
             # 绘制带有 Y 轴偏移的波形数据
             self.waveform_plots[i].setData(downsampled_data)
 
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main_window = WaveformPlotter()

@@ -13,10 +13,9 @@ from ui_compiled.main_window import Ui_ArcNeuroViz
 from pages.import_settings_page import ImportSettingsWindow
 from pages.rhd2avzproject_page import Rhd2AVZ
 from pages.import_from_folder_page import ImportFromFolder
-from pages.model_page import ModelPage
 
 from widgets.BrainModelWidget import BrainModelWidget
-from widgets.OpenGLWaveWiget import CustomOpenGLWidget
+
 from widgets.VTK_model_viewer import VTKModelViewer
 from widgets.main_wave_pyqtgraph_widget import WaveformWidget
 
@@ -115,25 +114,8 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # 将容器添加到主窗口中
         self.waveform_container.show()
 
-    def init_custom_opengl_widget(self):
-        self.opengl_container = QWidget(self)
-        self.opengl_container.setGeometry(305, 30, 705, 680)  # 设置位置和尺寸
-
-        self.opengl_layout = QVBoxLayout(self.opengl_container)
-        self.opengl_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.opengl_widget = CustomOpenGLWidget(self.opengl_container)
-        self.opengl_layout.addWidget(self.opengl_widget)
-
-        # 将容器添加到主窗口中
-        self.opengl_container.show()
-
-        # 在 MainWindow 中应用圆角
-        self.opengl_widget.set_rounded_corners(5)
-
     def initialize_abstract_tree_structure(self):
-        """初始化空的抽象树结构"""
-        # 例如，创建一个只有PortA和Hardware1的空结构
+        """初始化树结构"""
         port_a_item = QtGui.QStandardItem("Port example")
         hardware_item = QtGui.QStandardItem("Hardware example")
         channel_item = QtGui.QStandardItem("Channel example")
@@ -175,7 +157,6 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         """打开模型窗口"""
         if not self.model_window:
             print("Opening model window...")
-            self.model_window = ModelPage()
             self.model_window.mainWindow = self
             self.model_window.init()
         self.model_window.show()

@@ -25,6 +25,7 @@ class VTKModelViewer:
 
     def _setup_interactor(self):
         """设置 VTK 交互器和自定义交互风格"""
+
         self.interactor = self.brain_widget.GetRenderWindow().GetInteractor()
         style = CustomInteractorStyle(start_rotation_callback=self.start_rotation,
                                       stop_rotation_callback=self.stop_rotation)
