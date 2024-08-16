@@ -33,7 +33,7 @@ class WaveformWidget(QWidget):
 
         self.time_axis_widget.getPlotItem().getViewBox().setBackgroundColor('k')  # 设置背景色为黑色
 
-        # 绘制不可见的辅助线
+        # 绘制不可见的辅助线-
         self.time_axis_widget.plot([0, self.time_duration], [0, 0], pen=pg.mkPen((0, 0, 0, 0), width=0))
 
         # 添加扫描线到时间轴
