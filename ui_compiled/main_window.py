@@ -21,8 +21,12 @@ class Ui_ArcNeuroViz(object):
         self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
         self.menuHelp.setObjectName("menuHelp")
         self.treeView = QtWidgets.QTreeView(parent=ArcNeuroViz)
-        self.treeView.setGeometry(QtCore.QRect(10, 30, 281, 681))
+        self.treeView.setGeometry(QtCore.QRect(10, 240, 291, 471))
         self.treeView.setObjectName("treeView")
+        self.BrainWidget = QVTKRenderWindowInteractor(parent=ArcNeuroViz)
+        self.BrainWidget.setEnabled(True)
+        self.BrainWidget.setGeometry(QtCore.QRect(10, 30, 291, 201))
+        self.BrainWidget.setObjectName("BrainWidget")
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
@@ -34,3 +38,4 @@ class Ui_ArcNeuroViz(object):
         ArcNeuroViz.setWindowTitle(_translate("ArcNeuroViz", "Arc NeuroWave Visualizer"))
         self.menuFile.setTitle(_translate("ArcNeuroViz", "File"))
         self.menuHelp.setTitle(_translate("ArcNeuroViz", "Help"))
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor

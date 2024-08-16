@@ -1,26 +1,37 @@
 import os
-
 import h5py
-from PyQt6 import QtGui, QtCore
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
+from PyQt6.QtGui import QIcon
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
+
+from collections import defaultdict
 from data_processing.data_loader import load_data_from_h5, sort_key
-from pages.model_page import ModelPage
 
 from ui_compiled.main_window import Ui_ArcNeuroViz
-from widgets.OpenGLWiget import CustomOpenGLWidget
 
 from pages.import_settings_page import ImportSettingsWindow
 from pages.rhd2avzproject_page import Rhd2AVZ
 from pages.import_from_folder_page import ImportFromFolder
+from pages.model_page import ModelPage
 
-from collections import defaultdict
+from widgets.BrainModelWidget import BrainModelWidget
+from widgets.OpenGLWaveWiget import CustomOpenGLWidget
+from widgets.VTK_model_viewer import VTKModelViewer
+from widgets.main_wave_pyqtgraph_widget import WaveformWidget
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
+        self.vtk_viewer = None
+        self.model_widget = None
+        self.model_widget_layout = None
+        self.model_container = None
+        self.waveform_container = None
+        self.waveform_widget_layout = None
+        self.waveform_widget = None
+        self.brain_widget = None
         self.model_window = None
         self.renderer = None
         self.vtk_widget = None
@@ -28,6 +39,7 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.opengl_layout = None
         self.opengl_container = None
         self.setupUi(self)
+
         # 初始化模型
         self.model = QtGui.QStandardItemModel()
         self.model.setHorizontalHeaderLabels(["no working dir set:"])
@@ -36,9 +48,9 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # 初始化时创建抽象的结构
         self.initialize_abstract_tree_structure()
 
-        self.settings_window = None  # 添加一个属性来存储设置窗口的实例
-        self.rhd2avz_window = None  # 添加一个属性来存储RHD转AVZ项目窗口的实例
-        self.import_from_folder_window = None  # 添加一个属性来存储从文件夹导入窗口的实例
+        self.settings_window = None
+        self.rhd2avz_window = None
+        self.import_from_folder_window = None
         self.actionAbout = None
         self.actionExit = None
         self.actionOpen = None
@@ -51,6 +63,7 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.working_dir = None
         self.setWindowIcon(QIcon('assets\\mainIcon.png'))
         self.init_actions()
+
         # 设置窗口样式表
         self.setStyleSheet("""
             QMainWindow {
@@ -60,8 +73,47 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.setFixedSize(1015, 720)
 
         # 延迟初始化 OpenGL
-        self.init_custom_opengl_widget()
-        self.open_model_window()
+        # self.init_custom_opengl_widget()
+        # self.initialize_brain_widget()
+        self.init_waveform_widget()
+        self.initialize_vtk_viewer()
+
+    def initialize_vtk_viewer(self):
+        """初始化 VTK 模型查看器"""
+        self.vtk_viewer = VTKModelViewer(self.BrainWidget)
+        self.vtk_viewer.initialize()
+
+    def initialize_brain_widget(self):
+        """在指定位置和大小初始化 BrainModelWidget"""
+        self.brain_widget = QWidget(self)
+        print("Initializing BrainModelWidget...")
+        # 设置位置和大小
+        self.brain_widget.setGeometry(QtCore.QRect(10, 29, 280, 201))
+
+        self.opengl_layout = QVBoxLayout(self.brain_widget)
+        self.opengl_layout.setContentsMargins(0, 0, 0, 0)
+        print("Creating BrainModelWidget...")
+        # 使用指定的 .obj 文件路径初始化 BrainModelWidget
+        obj_file_path = r"D:\Dev\LNZN\ArcNeuroViz\models\processed_regions"
+        self.opengl_widget = BrainModelWidget(obj_file_path, self.brain_widget)
+        print("BrainModelWidget created.")
+        self.opengl_layout.addWidget(self.opengl_widget)
+        print("BrainModelWidget added to layout.")
+        self.brain_widget.show()  # 显示小部件
+
+    # 在 MainWindow 类中添加以下方法
+    def init_waveform_widget(self):
+        self.waveform_container = QWidget(self)
+        self.waveform_container.setGeometry(305, 30, 705, 680)
+
+        self.waveform_widget_layout = QVBoxLayout(self.waveform_container)
+        self.waveform_widget_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.waveform_widget = WaveformWidget(self.waveform_container)
+        self.waveform_widget_layout.addWidget(self.waveform_widget)
+
+        # 将容器添加到主窗口中
+        self.waveform_container.show()
 
     def init_custom_opengl_widget(self):
         self.opengl_container = QWidget(self)

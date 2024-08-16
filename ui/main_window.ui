@@ -39,13 +39,34 @@
    <property name="geometry">
     <rect>
      <x>10</x>
+     <y>240</y>
+     <width>291</width>
+     <height>471</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QVTKRenderWindowInteractor" name="BrainWidget" native="true">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>10</x>
      <y>30</y>
-     <width>281</width>
-     <height>681</height>
+     <width>291</width>
+     <height>201</height>
     </rect>
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QVTKRenderWindowInteractor</class>
+   <extends>QWidget</extends>
+   <header>vtkmodules.qt.QVTKRenderWindowInteractor</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
