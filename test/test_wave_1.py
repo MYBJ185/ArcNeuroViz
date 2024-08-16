@@ -32,32 +32,50 @@ class WaveformPlotter(QtWidgets.QMainWindow):
 
         # 创建32个波形图
         self.num_waveforms = 32
-        self.num_data_points = 30000
-        self.downsample_rate = 5
+        self.num_data_points = 4000
+        self.downsample_rate = 1
+        self.step_size = 3  # 每次移动3个坐标点
         self.waveform_plots = []
         self.data = []
+        self.buffer_size = 10000  # 缓冲区大小
+        self.random_buffer = np.random.normal(size=(self.num_waveforms, self.buffer_size)) * 5000
+        self.buffer_index = 0
 
         self.create_waveforms()
 
         # 设置定时器用于更新数据
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_waveforms)
-        self.timer.start(16)  # 每50ms更新一次
+        self.timer.start(16)  # 每16ms更新一次
 
     def create_waveforms(self):
         for i in range(self.num_waveforms):
-            # 模拟生成60000个数据点的波形数据
-            waveform_data = np.random.normal(size=self.num_data_points)
+            # 初始生成300000个数据点的波形数据
+            waveform_data = np.random.normal(size=self.num_data_points) * 5000
             self.data.append(waveform_data)
 
-            # 降采样到700个数据点
+            # 降采样到3000个数据点
             downsampled_data = downsample(waveform_data, self.downsample_rate)
 
             # 为每个波形图创建一个PlotItem
-            # noinspection PyUnresolvedReferences
+            color = (i * 8, 255, 255 - i * 8)
             plot = self.plot_widget.addPlot()
-            plot_item = plot.plot(downsampled_data, pen=pg.mkPen(color=(i * 8, 255, 255 - i * 8), width=1))
+            plot_item = plot.plot(downsampled_data, pen=pg.mkPen(color=color, width=1))
             self.waveform_plots.append(plot_item)
+
+            # 在绘图区内显示标签
+            text = f"A-{i + 1:03d}"
+            text_item = pg.TextItem(text, color=color, anchor=(0, 0.5))
+            plot.addItem(text_item)
+            text_item.setPos(-120, 0)  # 设置标签位置，紧贴左侧
+
+            # 关闭鼠标靠近时显示的 "A" 标签
+            plot.hideButtons()
+
+            # 固定坐标轴范围
+            plot.setXRange(-120, 3000, padding=0)
+            plot.setYRange(-20000, 20000, padding=0)
+            plot.setLimits(xMin=-120, xMax=3000, yMin=-20000, yMax=20000)
 
             # 设置波形图的基本属性
             plot.showAxis('left', False)
@@ -65,18 +83,25 @@ class WaveformPlotter(QtWidgets.QMainWindow):
             plot.setMouseEnabled(x=False, y=False)
 
             # 增加一些间距以便显示多个波形图
-            # noinspection PyUnresolvedReferences
             self.plot_widget.nextRow()
 
     def update_waveforms(self):
         for i in range(self.num_waveforms):
-            # 模拟数据滚动：将数据向左滚动，并在右侧添加新的随机数据
-            self.data[i] = np.roll(self.data[i], -1)
-            self.data[i][-1] = np.random.normal()
+            # 使用缓冲区中的随机数据进行更新
+            self.data[i] = np.roll(self.data[i], -self.step_size)
+            if self.buffer_index + self.step_size < self.buffer_size:
+                self.data[i][-self.step_size:] = self.random_buffer[i, self.buffer_index:self.buffer_index + self.step_size]
+            else:
+                # 如果缓冲区耗尽，重新生成缓冲区
+                self.random_buffer = np.random.normal(size=(self.num_waveforms, self.buffer_size)) * 5000
+                self.buffer_index = 0
+                self.data[i][-self.step_size:] = self.random_buffer[i, self.buffer_index:self.buffer_index + self.step_size]
 
-            # 降采样
+        self.buffer_index += self.step_size
+
+        # 降采样
+        for i in range(self.num_waveforms):
             downsampled_data = downsample(self.data[i], self.downsample_rate)
-
             # 更新波形图的数据
             self.waveform_plots[i].setData(downsampled_data)
 
