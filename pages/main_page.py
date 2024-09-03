@@ -7,6 +7,8 @@ from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
 
 from collections import defaultdict
 from data_processing.data_loader import load_data_from_h5, sort_key
+from widgets.main_window.video_tabs_widget import VideoTabsWidget
+from widgets.main_window.wave_widget import load_data_generators, WaveformPlotter
 
 from ui_compiled.main_window import Ui_ArcNeuroViz
 
@@ -14,29 +16,18 @@ from pages.import_settings_page import ImportSettingsWindow
 from pages.rhd2avzproject_page import Rhd2AVZ
 from pages.import_from_folder_page import ImportFromFolder
 
-from widgets.BrainModelWidget import BrainModelWidget
-
-from widgets.VTK_model_viewer import VTKModelViewer
-from widgets.main_wave_pyqtgraph_widget import WaveformWidget
+from widgets.main_window.VTK_model_viewer import VTKModelViewer
 
 
 class MainWindow(QMainWindow, Ui_ArcNeuroViz):
     def __init__(self) -> None:
         super(MainWindow, self).__init__()
-        self.vtk_viewer = None
-        self.model_widget = None
-        self.model_widget_layout = None
-        self.model_container = None
-        self.waveform_container = None
-        self.waveform_widget_layout = None
+        self.video_tabs_widget = None
         self.waveform_widget = None
-        self.brain_widget = None
+        self.waveform_container = None
+        self.vtk_viewer = None
         self.model_window = None
-        self.renderer = None
-        self.vtk_widget = None
-        self.opengl_widget = None
-        self.opengl_layout = None
-        self.opengl_container = None
+
         self.setupUi(self)
 
         # 初始化模型
@@ -50,14 +41,12 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         self.settings_window = None
         self.rhd2avz_window = None
         self.import_from_folder_window = None
+
         self.actionAbout = None
         self.actionExit = None
         self.actionOpen = None
         self.actionOpenFromFolder = None
         self.actionSave = None
-        self.rotator = None
-        self.iren = None
-        self.ren = None
 
         self.working_dir = None
         self.setWindowIcon(QIcon('assets\\mainIcon.png'))
@@ -69,50 +58,47 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
                 background-color: #2b2b2b;
             }
         """)
-        self.setFixedSize(1015, 720)
-
-        # 延迟初始化 OpenGL
-        # self.init_custom_opengl_widget()
-        # self.initialize_brain_widget()
-        self.init_waveform_widget()
+        self.setFixedSize(1325, 720)
         self.initialize_vtk_viewer()
+        self.initialize_waveform_plot()
+        self.initialize_video_tabs_widget()
+
+    def initialize_video_tabs_widget(self):
+        """初始化视频标签小部件"""
+        # 实例化 VideoTabsWidget
+        self.video_tabs_widget = VideoTabsWidget(self)
+
+        # 设置位置和大小
+        self.video_tabs_widget.setGeometry(1020, -5, 300, 200)
+
+        # 调用初始化方法
+        self.video_tabs_widget.initialize(["../../2024-07-21 23-02-52.mp4", "../../2024-08-20 09-10-03.mp4"])
+        self.video_tabs_widget.play_all_videos()
+
+    def initialize_waveform_plot(self):
+        """初始化波形图"""
+        # 创建一个新的 QWidget 作为波形图容器
+        self.waveform_container = QWidget(self)
+
+        # 指定波形图容器的位置和大小（例如在窗口的右侧）
+        self.waveform_container.setGeometry(310, 30, 705, 680)  # (x, y, width, height)
+        self.waveform_container.setStyleSheet("background-color: #1e1e1e;")
+
+        # 创建一个垂直布局并将其添加到波形图容器
+        waveform_layout = QVBoxLayout(self.waveform_container)
+        waveform_layout.setContentsMargins(0, 0, 0, 0)
+
+        # 加载数据生成器
+        data_generators = load_data_generators()
+
+        # 创建波形图对象，并添加到波形图容器的布局中
+        self.waveform_widget = WaveformPlotter(data_generators)
+        waveform_layout.addWidget(self.waveform_widget)
 
     def initialize_vtk_viewer(self):
         """初始化 VTK 模型查看器"""
         self.vtk_viewer = VTKModelViewer(self.BrainWidget)
         self.vtk_viewer.initialize()
-
-    def initialize_brain_widget(self):
-        """在指定位置和大小初始化 BrainModelWidget"""
-        self.brain_widget = QWidget(self)
-        print("Initializing BrainModelWidget...")
-        # 设置位置和大小
-        self.brain_widget.setGeometry(QtCore.QRect(10, 29, 280, 201))
-
-        self.opengl_layout = QVBoxLayout(self.brain_widget)
-        self.opengl_layout.setContentsMargins(0, 0, 0, 0)
-        print("Creating BrainModelWidget...")
-        # 使用指定的 .obj 文件路径初始化 BrainModelWidget
-        obj_file_path = r"D:\Dev\LNZN\ArcNeuroViz\models\processed_regions"
-        self.opengl_widget = BrainModelWidget(obj_file_path, self.brain_widget)
-        print("BrainModelWidget created.")
-        self.opengl_layout.addWidget(self.opengl_widget)
-        print("BrainModelWidget added to layout.")
-        self.brain_widget.show()  # 显示小部件
-
-    # 在 MainWindow 类中添加以下方法
-    def init_waveform_widget(self):
-        self.waveform_container = QWidget(self)
-        self.waveform_container.setGeometry(305, 30, 705, 680)
-
-        self.waveform_widget_layout = QVBoxLayout(self.waveform_container)
-        self.waveform_widget_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.waveform_widget = WaveformWidget(self.waveform_container)
-        self.waveform_widget_layout.addWidget(self.waveform_widget)
-
-        # 将容器添加到主窗口中
-        self.waveform_container.show()
 
     def initialize_abstract_tree_structure(self):
         """初始化树结构"""
@@ -153,17 +139,9 @@ class MainWindow(QMainWindow, Ui_ArcNeuroViz):
         # noinspection PyUnresolvedReferences
         self.actionExit.triggered.connect(self.close)  # 点击Exit退出应用
 
-    def open_model_window(self):
-        """打开模型窗口"""
-        if not self.model_window:
-            print("Opening model window...")
-            self.model_window.mainWindow = self
-            self.model_window.init()
-        self.model_window.show()
-
     def open_from_folder_window(self):
         """打开设置窗口"""
-        if not self.settings_window:
+        if not self.import_from_folder_window:
             print("Opening from_folder_window window...")
             self.import_from_folder_window = ImportFromFolder()
             self.import_from_folder_window.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)  # 设置模态窗口
